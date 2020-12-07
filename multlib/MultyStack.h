@@ -15,6 +15,7 @@ protected:
     int length;
     T1* x;
     int count;
+    T1** newInd;
     Stack <T1>* stacks;
 public:
 
@@ -33,7 +34,9 @@ public:
     friend istream& operator >> (istream& istr, MultyStack<T1>& A);
     int GetLength();
     int GetCount();
-    void Relocation(int ind);
+    void Repack(int ind);
+    void RelocationRight(int* _sizes, int ind);
+    void RelocationLeft(int* _sizes, int ind);
 };
 
 template <class T1>
@@ -139,7 +142,7 @@ inline void MultyStack<T1>::push(T1 elem, int i)
     if ((i < 0) && (i>=count))
         throw logic_error("invalid_index");
     if (stacks[i].IsFull())
-        (*this).Relocation(i);
+        (*this).Repack(i);
     stacks[i].push(elem);
 }
 
@@ -199,7 +202,7 @@ inline int MultyStack<T1>::GetCount()
     return count;
 }
 template<class T1>
-inline void MultyStack<T1>::Relocation(int ind)
+inline void MultyStack<T1>::Repack(int ind)
 {
     int freeSize = 0;
     for (int i = 0; i < count; i++)
@@ -212,14 +215,14 @@ inline void MultyStack<T1>::Relocation(int ind)
     int* sizes = new int[count];
     int ost = int(floor(double(freeSize / count)));
 
-    for (int i = 0; i < (count - 1); i++)
+    for (int i = 0; i < count; i++)
     {
+        if(i!=ind)
         sizes[i] = stacks[i].GetVS()+1+ost;
     }
   
-    sizes[count - 1] = stacks[count - 1].GetVS()+length - (ost * (count - 1));
-    T1** newInd = new T1 * [count];
-    
+    sizes[ind] = stacks[ind].GetVS()+length - (ost * (count - 1));
+    newInd = new T1 * [count];
     int k = 0;
     for (int i = 0; i < count; i++)
     {
@@ -230,28 +233,12 @@ inline void MultyStack<T1>::Relocation(int ind)
     {
         if (newInd[i] == oldInd[i])
             stacks[i].set(stacks[i].GetVS(), sizes[i], newInd[i]);
-        if (newInd[i] < oldInd[i])
-        {
-            for (int j = 0; j <= stacks[i].GetVS(); j++)
-                newInd[i][j] = oldInd[i][j];
-            stacks[i].set(stacks[i].GetVS(), sizes[i], newInd[i]);
-        }
-        if (newInd[i] > oldInd[i])
-        {
-            for (int k = i; k < count; k++)
-                if (newInd[k] > oldInd[k])
-                    continue;
-                else
-                    break;
-            k--;
-            for (int s = k; s >= i; s--)
-            {
-                for (int j = stacks[s].GetVS(); j >-1; j--)
-                    newInd[s][j] = oldInd[s][j];
-                stacks[s].set(stacks[s].GetVS(), sizes[s], newInd[s]);
-            }
 
-        }
+        if (newInd[i] < oldInd[i])
+            RelocationLeft(sizes, i);
+   
+        if (newInd[i] > oldInd[i])
+            RelocationRight(sizes, i);
     }
     T1** temp = oldInd;
     oldInd = newInd;
@@ -259,4 +246,32 @@ inline void MultyStack<T1>::Relocation(int ind)
     delete[] sizes;
 
 }
+
+template<class T1>
+inline void MultyStack<T1>::RelocationRight(int* _sizes, int ind)
+{
+    int k = 0;
+    for (k = ind; k < count; k++)
+        if (newInd[k] > oldInd[k])
+            continue;
+        else
+            break;
+    k--;
+    for (int s = k; s >= ind; s--)
+    {
+    for (int j = stacks[s].GetVS(); j > -1; j--)
+        newInd[s][j] = oldInd[s][j];
+    stacks[s].set(stacks[s].GetVS(), _sizes[s], newInd[s]);
+    }
+
+}
+
+template<class T1>
+inline void MultyStack<T1>::RelocationLeft(int* _sizes, int ind)
+{
+    for (int j = 0; j <= stacks[ind].GetVS(); j++)
+        newInd[ind][j] = oldInd[ind][j];
+    stacks[ind].set(stacks[ind].GetVS(), _sizes[ind], newInd[ind]);
+}
+
 #endif
