@@ -16,7 +16,10 @@ protected:
     T1* x;
     int count;
     T1** newInd;
-    Stack <T1>* stacks;
+    Stack <T1>* stacks;    
+    void Relocation(int* size);
+    void RelocationRight(int* _sizes, int ind);
+    void RelocationLeft(int* _sizes, int ind);
 public:
 
     MultyStack();
@@ -35,9 +38,7 @@ public:
     int GetLength();
     int GetCount();
     void Repack(int ind);
-    void Relocation(int* size);
-    void RelocationRight(int* _sizes, int ind);
-    void RelocationLeft(int* _sizes, int ind);
+
 };
 
 template <class T1>
