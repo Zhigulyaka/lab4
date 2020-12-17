@@ -159,16 +159,15 @@ Stack<T1>& Stack<T1>::operator =(Stack<T1>& other)
 template<class T1>
 inline T1 Stack<T1>::EvMax()
 {
-    T1 max = 1;
+    Stack<T1> _s = *this;
+    T1 max = 0;
     int j = 0;
-    int _vs = (*this).vs;
-    for (int i = 0; i <= vs; i++)
+    for (int i = 0; i <= _s.vs; i++)
     {
-        j = pull();
+        j = s.pull();
         if ((max < j) && ((j % 2) == 0))
             max = j;
     }
-    (*this).vs = _vs;
     return max;
 
 }
